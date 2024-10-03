@@ -96,5 +96,3 @@ with st.expander("Delete Transaction"):
 
 # Close the SQLite connection when the app is done
 conn.close()
-
-print("new line for commit")
