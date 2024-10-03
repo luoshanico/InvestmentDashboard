@@ -92,7 +92,9 @@ with st.expander("Delete Transaction"):
             df_transactions = pd.DataFrame(transactions, columns=['ID', 'Date', 'Asset', 'Number of Units'])
 
         if delete_cancel:
-            st.info('Delete operation canceled.')
+            st.info('Delete operation canceled!')
 
 # Close the SQLite connection when the app is done
 conn.close()
+
+print("new line for commit")
