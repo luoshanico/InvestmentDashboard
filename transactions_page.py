@@ -34,10 +34,6 @@ def show_transactions_page(conn):
                 st.success('Transaction added successfully!')
                 st.rerun()
 
-                # Refresh the transaction table after deletion
-                transactions = fetch_transactions()
-                df_transactions = pd.DataFrame(transactions, columns=['ID', 'Date', 'Asset', 'Number of Units'])
-
 
     # Add "Delete Transaction" form
     with st.expander("Delete Transaction"):
@@ -51,10 +47,3 @@ def show_transactions_page(conn):
                 db.delete_transaction(conn, transaction_id)
                 st.success(f'Transaction with ID {transaction_id} deleted successfully!')
                 st.rerun()
-
-                # Refresh the transaction table after deletion
-                transactions = fetch_transactions()
-                df_transactions = pd.DataFrame(transactions, columns=['ID', 'Date', 'Asset', 'Number of Units'])
-
-    # Close the SQLite connection when the app is done
-    # conn.close()
