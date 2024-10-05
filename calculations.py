@@ -114,5 +114,25 @@ def get_holdings_values(conn):
     return df_value
 
 
+# Get today's holdings and values only
+def get_todays_holdings_and_values(conn):
+    # Get today's date   
+    today = pd.Timestamp(date.today())
+
+    # df_value
+    df_value = get_holdings_values(conn)
+
+    # Filter the DataFrame for today's date
+    df_today = df_value[df_value['Date'] == today]
+
+    # Group by 'Asset' and summarize today's cumulative units and value
+    df_today_summary = df_today.groupby('Asset').agg(
+        Holdings=('Cumulative_Units', 'sum'),   # Sum of today's holdings for each asset
+        Value=('Value', 'sum')                  # Total value of today's holdings for each asset
+    ).reset_index()
+
+    return df_today_summary
+
+
 
 

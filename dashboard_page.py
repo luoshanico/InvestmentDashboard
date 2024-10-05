@@ -12,10 +12,9 @@ def show_dashboard_page(conn):
     
     # Title
     st.title("Investment Dashboard")
+    st.subheader('Valuation')
 
     # Total value graph
-    st.write("Total portfolio value:")
-    
     df_total_value = df_values[['Date','Value']].groupby(['Date']).sum()
         
     # Graph
@@ -25,7 +24,7 @@ def show_dashboard_page(conn):
     # Add labels and title
     ax.set_xlabel('Date')
     ax.set_ylabel('Value')
-    ax.set_title('Asset Holdings Over Time')
+    ax.set_title('Total portfolio value')
     ax.legend(title='Asset')
 
     # Rotate x-axis labels for better readability
@@ -35,9 +34,7 @@ def show_dashboard_page(conn):
     # Display the Matplotlib figure using st.pyplot()
     st.pyplot(fig)
 
-    # Graph of value by holding
-    st.write("Value by holding:")
-    
+    # Graph of value by holding   
     # Create a plot for each asset
     fig, ax  = plt.subplots(figsize=(10,6))
 
@@ -49,7 +46,7 @@ def show_dashboard_page(conn):
     # Add labels and title
     ax.set_xlabel('Date')
     ax.set_ylabel('Value')
-    ax.set_title('Asset Holdings Over Time')
+    ax.set_title('Value by holding')
     ax.legend(title='Asset')
 
     # Rotate x-axis labels for better readability
@@ -61,7 +58,8 @@ def show_dashboard_page(conn):
 
     # Show values and holdings table
     st.subheader('Holdings')
-    st.dataframe(df_values, hide_index=True)
+    df_holdings = calcs.get_todays_holdings_and_values(conn)
+    st.dataframe(df_holdings, hide_index=True)
 
     
 
