@@ -40,7 +40,6 @@ def show_dashboard_page(conn):
     # Show values and holdings table
     st.subheader('Holdings')
     st.dataframe(df_values, hide_index=True)
-    st.dataframe(df_assets, hide_index=True)
 
     
 

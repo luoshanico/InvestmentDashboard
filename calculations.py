@@ -79,15 +79,37 @@ def get_holdings_values(conn):
     df_unit_holdings['Date'] = pd.to_datetime(df_unit_holdings['Date'])
     df_prices['Date'] = pd.to_datetime(df_prices['Date'])
 
-    # Forward fill prices to cover weekends
-    df_prices.sort_values(by=['Asset', 'Date'], inplace=True)
-    df_prices['Price'] = df_prices.groupby('Asset')['Price'].ffill()
+    # Create a complete date range from the unit holdings table
+    complete_date_range = pd.date_range(start=df_unit_holdings['Date'].min(), end=df_unit_holdings['Date'].max())
+
+    # Reindex df_prices to cover all dates in the unit holdings for each asset
+    result = pd.DataFrame()
+
+    # Iterate over each asset
+    for asset in df_prices['Asset'].unique():
+        # Filter df_prices for the current asset
+        single_asset_prices = df_prices[df_prices['Asset'] == asset].set_index('Date')
+
+        # Reindex the asset's prices to cover all dates in the range
+        single_asset_prices = single_asset_prices.reindex(complete_date_range)
+
+        # Fill the 'Asset' column
+        single_asset_prices['Asset'] = asset
+
+        # Forward fill prices to cover weekends and missing dates
+        single_asset_prices['Price'] = single_asset_prices['Price'].ffill()
+
+        # Append to result DataFrame
+        result = pd.concat([result, single_asset_prices])
+
+    # Reset the index and rename the 'index' column to 'Date'
+    df_prices = result.reset_index().rename(columns={'index': 'Date'})
 
     # Left join prices onto unit holdings
     df_value = pd.merge(df_unit_holdings, df_prices[['Asset', 'Date', 'Price']], on=['Asset', 'Date'], how='left')
 
     # Multiply prices and holdings to get value
-    df_value['Value'] = df_value['Cumulative_Units']*df_value['Price']
+    df_value['Value'] = df_value['Cumulative_Units'] * df_value['Price']
 
     return df_value
 
