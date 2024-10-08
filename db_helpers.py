@@ -55,7 +55,7 @@ def delete_asset(conn, asset_id):
 # Return AssetID from Ticker
 def fetch_asset_id(conn, asset):
     c = conn.cursor()
-    c.execute("SELECT DISTINCT(asset_id) FROM assets WHERE asset = ?", (asset))
+    c.execute("SELECT DISTINCT(asset_id) FROM assets WHERE asset = ?", (asset,))
     conn.commit()
 
 
