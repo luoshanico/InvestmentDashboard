@@ -45,7 +45,12 @@ def show_assets_page(conn):
 
                     # If ticker exists, call API to get pricing data and save to database
                     if not stock_info_dict['stock_name'] == '':
-                        pricing_data = api.get_pricing_data(ticker)
+
+                        # Get asset_id from database
+                        asset_id = db.fetch_asset_id(conn, ticker)
+                        
+                        # Get pricing data and upload
+                        pricing_data = api.get_pricing_data(ticker, asset_id)
                         if pricing_data == 0:
                             st.error('Could not find prices for {}.'.format(ticker))
                         else:
@@ -79,12 +84,19 @@ def show_assets_page(conn):
     selected_asset = st.selectbox("Choose an asset:", options)
     
     # Fetch and plot prices for selected asset
-    if type(selected_asset) == None: 
-        prices = db.fetch_prices(conn)
-        df_price_graph = pd.DataFrame(prices, columns=['ID','Asset','Date','Price'])
-        df_price_graph = df_price_graph[df_price_graph['Asset']==selected_asset]
-        df_price_graph = df_price_graph[['Date','Price']]
+    if not type(selected_asset) == None:
+        
+        # Get Asset_ID
+        selected_asset_id = db.fetch_asset_id(conn, selected_asset)
+        
+        # Get prices for selected asset
+        prices = db.fetch_prices_by_asset(conn, selected_asset_id)
+        
+        # Move prices into dataframe
+        df_price_graph = pd.DataFrame(prices, columns=['Date','Price'])
         df_price_graph = df_price_graph.set_index('Date')
+        
+        # Plot price graph
         st.line_chart(df_price_graph['Price'])
 
 

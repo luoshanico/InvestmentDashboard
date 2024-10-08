@@ -55,8 +55,9 @@ def delete_asset(conn, asset_id):
 # Return AssetID from Ticker
 def fetch_asset_id(conn, asset):
     c = conn.cursor()
-    c.execute("SELECT DISTINCT(asset_id) FROM assets WHERE asset = ?", (asset,))
-    conn.commit()
+    c.execute("SELECT MAX(asset_id) FROM assets WHERE asset = ?", (asset,))
+    result = c.fetchone()
+    return result[0] if result else None
 
 
 # ---- TRANSACTIONS ----
@@ -94,8 +95,8 @@ def fetch_transactions(conn):
             a.category,
             a.currency,
             t.num_units
-        FROM transactions AS t
-        LEFT JOIN assets AS a on a.asset_id = t.asset_id'''
+        FROM transactions t
+        LEFT JOIN assets a ON a.asset_id = t.asset_id'''
     c.execute(str_sql)
     rows = c.fetchall()
     return rows
@@ -140,6 +141,7 @@ def fetch_prices(conn):
     c.execute('''
               SELECT
                 p.asset_id,
+                a.asset,
                 a.name,
                 a.currency,
                 p.date,
@@ -147,6 +149,19 @@ def fetch_prices(conn):
               FROM prices p
               LEFT JOIN assets a ON a.asset_id = p.asset_id
               ''')
+    rows = c.fetchall()
+    return rows
+
+# Function to fetch all prices from the database
+def fetch_prices_by_asset(conn, asset_id):
+    c = conn.cursor()
+    c.execute('''
+              SELECT
+                date,
+                price
+              FROM prices
+              WHERE asset_id = ?
+              ''',(asset_id,))
     rows = c.fetchall()
     return rows
 
