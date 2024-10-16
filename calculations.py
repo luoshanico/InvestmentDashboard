@@ -14,8 +14,8 @@ def get_unit_holdings(conn):
 
     # Fetch and convert the transaction table into a pandas DataFrame for calculations
     transactions = db.fetch_transactions(conn)
-    df_transactions = pd.DataFrame(transactions, columns=['ID', 'Date', 'Asset', 'Units'])
-    df_transactions.drop(columns=['ID'], inplace=True)
+    df_transactions = pd.DataFrame(transactions, columns=['ID', 'Date', 'Asset', 'Name', 'Category', 'Currency', 'Units'])
+    df_transactions.drop(columns=['ID','Name','Category','Currency'], inplace=True)
 
     # Ensure 'Date' is in datetime64[ns] format
     df_transactions['Date'] = pd.to_datetime(df_transactions['Date'])
@@ -73,7 +73,7 @@ def get_holdings_values(conn):
 
     # Fetch and convert the prices table in pandas Dataframe for calculations
     prices = db.fetch_prices(conn)
-    df_prices = pd.DataFrame(prices, columns=['ID', 'Asset', 'Date', 'Price'])
+    df_prices = pd.DataFrame(prices, columns=['ID', 'Asset', 'Name', 'Currency', 'Date', 'Price'])
 
     # Convert dates to datetime format
     df_unit_holdings['Date'] = pd.to_datetime(df_unit_holdings['Date'])
