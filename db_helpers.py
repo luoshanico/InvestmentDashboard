@@ -168,7 +168,7 @@ def fetch_prices_by_asset(conn, asset_id):
 # Function to delete prices by Asset ID
 def delete_price(conn, asset_id):
     c = conn.cursor()
-    c.execute("DELETE FROM prices WHERE asset_id=?", (asset_id))
+    c.execute("DELETE FROM prices WHERE asset_id=?", (asset_id,))
     conn.commit()
 
 def delete_all_price_data(conn):
@@ -182,6 +182,7 @@ def drop_all_tables(conn):
     c.execute("DROP TABLE prices")
     c.execute("DROP TABLE transactions")
     c.execute("DROP TABLE assets")
+    c.execute("DROP TABLE fx")
     conn.commit()
 
 
@@ -205,3 +206,30 @@ def insert_fx_data(conn, data):
     c.executemany("INSERT INTO fx (date, currency, fx_rate) VALUES (?, ?, ?)", (data))
     conn.commit()
 
+# Function to fetch fx rates from the database by currency
+def fetch_fx_rates(conn, currency):
+    c = conn.cursor()
+    c.execute('''
+              SELECT
+                fx_id,
+                date,
+                currency,
+                fx_rate
+              FROM fx
+              WHERE currency = ?
+              ''',(currency,))
+    rows = c.fetchall()
+    return rows
+
+
+def fetch_currencies(conn):
+    c = conn.cursor()
+    c.execute("SELECT DISTINCT(currency) FROM fx")
+    rows = c.fetchall()
+    rows = list(rows[0])
+    return rows
+
+def reset_currencies(conn):
+    c = conn.cursor()
+    c.execute("DELETE FROM fx")
+    conn.commit()

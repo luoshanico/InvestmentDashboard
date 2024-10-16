@@ -43,6 +43,30 @@ def show_assets_page(conn):
                     else:
                         st.warning("Ticker not found in Yahoo Finance")
 
+                    # If ticker exists, call API to get currency data and save to database
+                    if not stock_info_dict['stock_name'] == '':
+                        
+                        # Get asset currency
+                        currency = stock_info_dict['stock_currency']
+                        
+                        # If GBP then no need to get data
+                        if not (currency == 'GBP') or (currency == 'GBp'):
+
+                                # If we already have the currency stored in database, then no need to get the data
+                                existing_currencies = db.fetch_currencies(conn)
+                                if currency not in existing_currencies:                              
+                                
+                                    # Get ticker symbol for fx rate
+                                    fx_ticker = 'GBP' + currency + '=X'
+
+                                    # Get fx rates
+                                    fx_rates = api.get_fx_data(fx_ticker, currency)
+                                    if fx_rates == 0:
+                                        st.error('Could not find fx rates for {}.'.format(fx_ticker))
+                                    else:
+                                        db.insert_fx_data(conn, data=fx_rates)
+
+                    
                     # If ticker exists, call API to get pricing data and save to database
                     if not stock_info_dict['stock_name'] == '':
 
@@ -54,9 +78,36 @@ def show_assets_page(conn):
                         if pricing_data == 0:
                             st.error('Could not find prices for {}.'.format(ticker))
                         else:
+
+                            # Check if need to convert to GBP
+                            if not (currency == 'GBP') or (currency == 'GBp'):
+                                
+                                # Convert to dataframe for currency calculation
+                                pricing_df = pd.DataFrame(pricing_data, columns=['Asset_ID','Date','Price'])
+                                
+                                # Fetch fx rates from database
+                                fx_rates_for_conversion = db.fetch_fx_rates(conn, currency)
+                                fx_df = pd.DataFrame(fx_rates_for_conversion, columns=['ID','Date','Currency','FX_Rate'])
+
+                                # Join dataframes on date
+                                pricing_df = pd.merge(pricing_df, fx_df, on='Date', how='left')
+                                
+                                # Calculate GBP price
+                                pricing_df['Price (GBP)'] = pricing_df['Price'] / pricing_df['FX_Rate']
+                                
+                                # Drop columns and rename
+                                pricing_df = pricing_df[['Asset_ID','Date','Price (GBP)']]
+                                pricing_df = pricing_df.rename(columns={'Price (GBP)': 'Price'})
+
+                                # Convert back to tuple
+                                pricing_data = list(pricing_df.itertuples(index=False, name=None))
+
+
                             db.insert_pricing_data(conn, data=pricing_data)
-                            st.success('Asset added successfully!')
                             st.rerun()
+                            st.success('Asset added successfully!')
+
+                            ## Doesn't seem to be adding prices atm
                 
                 else:
                     st.warning("Asset already in system")
