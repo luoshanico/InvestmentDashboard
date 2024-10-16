@@ -73,7 +73,7 @@ def get_holdings_values(conn):
 
     # Fetch and convert the prices table in pandas Dataframe for calculations
     prices = db.fetch_prices(conn)
-    df_prices = pd.DataFrame(prices, columns=['ID', 'Asset', 'Name', 'Currency' 'Date', 'Price'])
+    df_prices = pd.DataFrame(prices, columns=['ID', 'Asset', 'Name', 'Currency', 'Date', 'Price'])
 
     # Convert dates to datetime format
     df_unit_holdings['Date'] = pd.to_datetime(df_unit_holdings['Date'])
