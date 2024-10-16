@@ -152,7 +152,7 @@ def fetch_prices(conn):
     rows = c.fetchall()
     return rows
 
-# Function to fetch all prices from the database
+# Function to fetch all prices by asset from the database
 def fetch_prices_by_asset(conn, asset_id):
     c = conn.cursor()
     c.execute('''
@@ -184,23 +184,24 @@ def drop_all_tables(conn):
     c.execute("DROP TABLE assets")
     conn.commit()
 
-# def fetch_assets_check_prices(conn):
-#     c = conn.cursor()
-#     query = """
-#                 SELECT 
-#                     t.asset AS Asset,
-#                     CASE 
-#                         WHEN p.asset IS NOT NULL THEN 'Downloaded'
-#                         ELSE 'Not Downloaded'
-#                     END AS [Download Status]
-#                 FROM 
-#                     (SELECT DISTINCT asset FROM transactions) t
-#                 LEFT JOIN 
-#                     (SELECT DISTINCT asset FROM prices) p
-#                 ON t.asset = p.asset
-#             """
-#     c.execute(query)
-#     rows = c.fetchall()
-#     return rows
 
+## --- FX ---
+
+def create_fx_table(conn):
+    c = conn.cursor()
+    c.execute('''
+        CREATE TABLE IF NOT EXISTS fx (
+            fx_id INTEGER PRIMARY KEY AUTOINCREMENT,
+            date DATE,
+            currency TEXT,
+            fx_rate REAL
+        )
+    ''')
+    conn.commit()
+
+# Function to insert fx data
+def insert_fx_data(conn, data):
+    c = conn.cursor()
+    c.executemany("INSERT INTO fx (date, currency, fx_rate) VALUES (?, ?, ?)", (data))
+    conn.commit()
 
