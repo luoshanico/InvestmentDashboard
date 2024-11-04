@@ -17,7 +17,7 @@ def show_assets_page(conn):
     st.write('All Assets:')
     st.dataframe(df_assets, hide_index=True)
 
-    ## Add assets
+    ## Add assets: add asset info, currency, price data to respective tables
     with st.expander("Add asset"):
         with st.form(key="add_form"):
             ticker = st.text_input('Asset ticker symbol')

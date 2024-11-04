@@ -16,10 +16,14 @@ def show_dashboard_page(conn):
     
         # DataFrame with key valuation and holding data
         df_values = calcs.get_holdings_values(conn)
+        df_values = df_values.reset_index()
+        
+        # st.write("df_values:", df_values)
         
         # subheader
         st.subheader('Valuation')
 
+        ####################
         # Total value graph
         df_total_value = df_values[['Date','Value']].groupby(['Date']).sum()
             
@@ -40,6 +44,7 @@ def show_dashboard_page(conn):
         # Display the Matplotlib figure using st.pyplot()
         st.pyplot(fig)
 
+        ####################
         # Graph of value by holding   
         # Create a plot for each asset
         fig, ax  = plt.subplots(figsize=(10,6))
@@ -62,7 +67,33 @@ def show_dashboard_page(conn):
         # Display the Matplotlib figure using st.pyplot()
         st.pyplot(fig)
 
-        # Show values and holdings table
+        ####################
+        # Graph of value by holding category
+        # Create a plot for the stacked area chart by category
+        fig, ax = plt.subplots(figsize=(10, 6))
+
+        # Prepare data for stacked area chart
+        # Group by 'Date' and 'Category' and calculate the sum of 'Value' for each combination
+        df_category_value = df_values.groupby(['Date', 'Category'])['Value'].sum().unstack(fill_value=0)
+
+        # Plot a stacked area chart
+        ax.stackplot(df_category_value.index, df_category_value.T, labels=df_category_value.columns)
+
+        # Add labels and title
+        ax.set_xlabel('Date')
+        ax.set_ylabel('Value')
+        ax.set_title('Portfolio Value by Category')
+        ax.legend(title='Category', loc='upper left')
+
+        # Rotate x-axis labels for better readability
+        plt.xticks(rotation=45)
+        plt.tight_layout()
+
+        # Display the Matplotlib figure using st.pyplot()
+        st.pyplot(fig)
+
+
+        ## Show values and holdings table
         st.subheader('Holdings')
         df_holdings = calcs.get_todays_holdings_and_values(conn)
         st.dataframe(df_holdings, hide_index=True)
