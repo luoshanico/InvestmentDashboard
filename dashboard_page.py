@@ -16,9 +16,9 @@ def show_dashboard_page(conn):
     
         # DataFrame with key valuation and holding data
         df_values = calcs.get_holdings_values(conn)
-        df_values = df_values.reset_index()
-        
-        # st.write("df_values:", df_values)
+        df_holdings = calcs.get_unit_holdings(conn)
+                
+        st.write("df_values:", df_values)
         
         # subheader
         st.subheader('Valuation')
@@ -66,6 +66,7 @@ def show_dashboard_page(conn):
 
         # Display the Matplotlib figure using st.pyplot()
         st.pyplot(fig)
+
 
         ####################
         # Graph of value by holding category

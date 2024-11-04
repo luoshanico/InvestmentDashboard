@@ -26,7 +26,7 @@ def show_assets_page(conn):
             add_confirm = st.form_submit_button('Add')
             if add_confirm:
                 
-                # Check that we don't already have the asset
+                # If asset not already in database then download from YF
                 if df_assets[df_assets['Asset'] == ticker]['Asset'].count() == 0: 
                     # Call API to get ticker info
                     stock_info_dict = api.get_stock_info(ticker)
@@ -43,71 +43,49 @@ def show_assets_page(conn):
                     else:
                         st.warning("Ticker not found in Yahoo Finance")
 
-                    # If ticker exists, call API to get currency data and save to database
-                    if not stock_info_dict['stock_name'] == '':
-                        
-                        # Get asset currency
-                        currency = stock_info_dict['stock_currency']
-                        
-                        # If GBP then no need to get data
-                        if not (currency == 'GBP') or (currency == 'GBp'):
-
-                                # If we already have the currency stored in database, then no need to get the data
-                                existing_currencies = db.fetch_currencies(conn)
-                                if currency not in existing_currencies:                              
-                                
-                                    # Get ticker symbol for fx rate
-                                    fx_ticker = 'GBP' + currency + '=X'
-
-                                    # Get fx rates
-                                    fx_rates = api.get_fx_data(fx_ticker, currency)
-                                    if fx_rates == 0:
-                                        st.error('Could not find fx rates for {}.'.format(fx_ticker))
-                                    else:
-                                        db.insert_fx_data(conn, data=fx_rates)
-
                     
                     # If ticker exists, call API to get pricing data and save to database
                     if not stock_info_dict['stock_name'] == '':
+
+                        # local variable abort_upload will instruct when not to upload
+                        abort_upload = False
 
                         # Get asset_id from database
                         asset_id = db.fetch_asset_id(conn, ticker)
                         
                         # Get pricing data and upload
                         pricing_data = api.get_pricing_data(ticker, asset_id)
-                        if pricing_data == 0:
+                        if pricing_data.size == 0:
                             st.error('Could not find prices for {}.'.format(ticker))
+                            abort_upload = True
                         else:
 
-                            # Check if need to convert to GBP
+                            # If not GBP pricing then download rate and convert to GBP
+                            currency = stock_info_dict['stock_currency']
                             if not (currency == 'GBP') or (currency == 'GBp'):
+
+                                # Get fx rates
+                                fx_ticker = 'GBP' + currency + '=X' # get ticker symbol for rate
+                                fx_rates = api.get_fx_data(fx_ticker, currency)
                                 
-                                # Convert to dataframe for currency calculation
-                                pricing_df = pd.DataFrame(pricing_data, columns=['Asset_ID','Date','Price'])
-                                
-                                # Fetch fx rates from database
-                                fx_rates_for_conversion = db.fetch_fx_rates(conn, currency)
-                                fx_df = pd.DataFrame(fx_rates_for_conversion, columns=['ID','Date','Currency','FX_Rate'])
+                                # if fx rates download succesfully then proceeds with conversion
+                                if not fx_rates.size == 0:
+                                    pricing_data = api.convert_prices_to_gbp(pricing_data, fx_rates)
 
-                                # Join dataframes on date
-                                pricing_df = pd.merge(pricing_df, fx_df, on='Date', how='left')
-                                
-                                # Calculate GBP price
-                                pricing_df['Price (GBP)'] = pricing_df['Price'] / pricing_df['FX_Rate']
-                                
-                                # Drop columns and rename
-                                pricing_df = pricing_df[['Asset_ID','Date','Price (GBP)']]
-                                pricing_df = pricing_df.rename(columns={'Price (GBP)': 'Price'})
+                                else: # if rates not downloaded then error message
+                                    st.error('Could not find fx rates for {}.'.format(fx_ticker))
+                                    abort_upload = True
 
-                                # Convert back to tuple
-                                pricing_data = list(pricing_df.itertuples(index=False, name=None))
-
-
-                            db.insert_pricing_data(conn, data=pricing_data)
-                            st.rerun()
-                            st.success('Asset added successfully!')
-
-                            ## Doesn't seem to be adding prices atm
+                            
+                            
+                            # Insert prices to database
+                            if abort_upload == True:
+                                st.error('Could not find prices for {}.'.format(ticker))
+                            else:
+                                pricing_data = tuple(pricing_data.itertuples(index=False, name=None)) # Convert to tuples for upload to database                            
+                                db.insert_pricing_data(conn, data=pricing_data)
+                                st.rerun()
+                                st.success('Asset added successfully!')
                 
                 else:
                     st.warning("Asset already in system")
