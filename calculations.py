@@ -140,6 +140,76 @@ def get_todays_holdings_and_values(conn):
     return df_today_summary
 
 
+def get_comparator(comp,conn):
+
+    # Get transactions
+    transactions = db.fetch_transactions(conn)
+    df_transactions = pd.DataFrame(transactions, columns=['ID', 'Date', 'Asset', 'Name', 'Category', 'Currency', 'Units'])
+    df_transactions.drop(columns=['ID','Name','Category','Currency'], inplace=True)
+    df_transactions['Date'] = pd.to_datetime(df_transactions['Date'])
+
+    # Get prices
+    prices = db.fetch_prices(conn)
+    df_prices = pd.DataFrame(prices, columns=['ID', 'Asset', 'Name', 'Currency', 'Date', 'Price'])
+    df_prices.drop(columns=['ID','Name','Currency'], inplace=True)
+    df_prices['Date'] = pd.to_datetime(df_prices['Date'])
+
+    # Merge transactions and prices to find amounts invested
+    df_invested = pd.merge(df_transactions, df_prices, how='left', on=['Asset','Date'])
+    df_invested['Invested'] = df_invested['Units'] * df_invested['Price']
+
+    # Find price of comp at these dates and then get units that could have been acquired
+    df_comp_prices = df_prices[df_prices['Asset']==comp]
+    df_comp_prices.rename(columns={"Asset":"Comp","Price":"Comp_Price"}, inplace=True)
+    df_comp = pd.merge(df_invested, df_comp_prices, how='left', on='Date')
+    df_comp['Comp_Units'] = df_comp['Invested'] / df_comp['Comp_Price']
+    df_comp.drop(columns=['Asset','Units', 'Price','Invested','Comp_Price'], inplace=True)
+    df_comp.rename(columns={"Comp_Units":"Units"}, inplace=True)
+
+    ## Get cumulative unit holdings of comps
+    # Group by asset and date, and sum the units (to handle duplicate dates for the same asset)
+    df_comp = df_comp.groupby(['Date'], as_index=False).sum()
+    df_comp = df_comp.sort_values(by=['Date'])
+    df_comp['Cumulative_Units'] = df_comp.groupby('Comp')['Units'].cumsum()
+
+    # Create a complete date range from the min to max date for each asset
+    date_range = pd.date_range(start=df_comp['Date'].min(), end=date.today())
+
+    # Reindex to include all dates in the range (even missing ones)
+    df_comp = df_comp.set_index('Date')
+    df_comp.index = pd.to_datetime(df_comp.index)
+    df_comp = df_comp.reindex(date_range)
+
+    # Forward fill the Cumulative_Units to handle missing dates
+    df_comp['Cumulative_Units'] = df_comp['Cumulative_Units'].ffill()
+
+    # Fill missing Units with 0 (assuming no transaction on those days)
+    df_comp['Units'] = df_comp['Units'].fillna(0)
+
+    # Fill the name of the Comp
+    df_comp['Comp'] = df_comp['Comp'].ffill()
+
+    # Reset the index and rename the 'index' column to 'Date'
+    df_comp = df_comp.reset_index().rename(columns={'index': 'Date'})
+
+
+    # Merge prices again to get get values for the comp holdings
+    df_comp.rename(columns={'Comp':'Asset'}, inplace=True)
+    df_comp['Asset'] = df_comp['Asset'].astype(str)
+    df_prices['Asset'] = df_prices['Asset'].astype(str)
+    df_comp = pd.merge(df_comp, df_prices, on=['Asset', 'Date'])
+    df_comp['Value'] = df_comp['Cumulative_Units'] * df_comp['Price']
+
+    # drop unneeded columns and set date as index
+    df_comp.drop(columns=['Price', 'Units', 'Cumulative_Units', 'Asset'], inplace=True)
+    df_comp.set_index('Date', inplace=True)
+
+
+    return df_comp
+
+
+
+
 
 
 

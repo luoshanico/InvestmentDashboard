@@ -8,4 +8,3 @@ def show_reset_page(conn):
         db.create_assets_table(conn)
         db.create_transactions_table(conn)
         db.create_prices_table(conn)
-        db.create_fx_table(conn)

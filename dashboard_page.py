@@ -16,20 +16,30 @@ def show_dashboard_page(conn):
     
         # DataFrame with key valuation and holding data
         df_values = calcs.get_holdings_values(conn)
-        df_holdings = calcs.get_unit_holdings(conn)
                 
-        st.write("df_values:", df_values)
+        #st.write("Values:", df_values.head())
         
         # subheader
         st.subheader('Valuation')
 
         ####################
+        # Choose comp
+        comp_options = db.fetch_asset_list(conn)
+        default_option = "Please select from list of assets"
+        comp_options.insert(0,default_option)
+        comp = st.selectbox(label='Select comparison:', options=comp_options)
+        
         # Total value graph
         df_total_value = df_values[['Date','Value']].groupby(['Date']).sum()
             
         # Graph
         fig, ax  = plt.subplots(figsize=(10,6))
         ax.plot(df_total_value.index, df_total_value['Value'], label='Portfolio value')  # Plot portfolio value by date
+
+        # Add comp to graph
+        if not comp ==  default_option:
+            df_comp = calcs.get_comparator(comp,conn)
+            ax.plot(df_comp.index, df_comp['Value'], label='Comp:' + comp)
         
         # Add labels and title
         ax.set_xlabel('Date')

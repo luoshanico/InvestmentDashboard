@@ -59,6 +59,13 @@ def fetch_asset_id(conn, asset):
     result = c.fetchone()
     return result[0] if result else None
 
+def fetch_asset_list(conn):
+    c = conn.cursor()
+    c.execute("SELECT asset FROM assets")
+    rows = c.fetchall()
+    rows = [row[0] for row in rows]
+    return rows
+
 
 # ---- TRANSACTIONS ----
 
@@ -182,54 +189,6 @@ def drop_all_tables(conn):
     c.execute("DROP TABLE prices")
     c.execute("DROP TABLE transactions")
     c.execute("DROP TABLE assets")
-    c.execute("DROP TABLE fx")
     conn.commit()
 
 
-## --- FX ---
-
-def create_fx_table(conn):
-    c = conn.cursor()
-    c.execute('''
-        CREATE TABLE IF NOT EXISTS fx (
-            fx_id INTEGER PRIMARY KEY AUTOINCREMENT,
-            date DATE,
-            currency TEXT,
-            fx_rate REAL
-        )
-    ''')
-    conn.commit()
-
-# Function to insert fx data
-def insert_fx_data(conn, data):
-    c = conn.cursor()
-    c.executemany("INSERT INTO fx (date, currency, fx_rate) VALUES (?, ?, ?)", (data))
-    conn.commit()
-
-# Function to fetch fx rates from the database by currency
-def fetch_fx_rates(conn, currency):
-    c = conn.cursor()
-    c.execute('''
-              SELECT
-                fx_id,
-                date,
-                currency,
-                fx_rate
-              FROM fx
-              WHERE currency = ?
-              ''',(currency,))
-    rows = c.fetchall()
-    return rows
-
-
-def fetch_currencies(conn):
-    c = conn.cursor()
-    c.execute("SELECT DISTINCT(currency) FROM fx")
-    rows = c.fetchall()
-    rows = list(rows[0])
-    return rows
-
-def reset_currencies(conn):
-    c = conn.cursor()
-    c.execute("DELETE FROM fx")
-    conn.commit()
