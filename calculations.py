@@ -111,6 +111,12 @@ def get_holdings_values(conn):
     # Multiply prices and holdings to get value
     df_value['Value'] = df_value['Cumulative_Units'] * df_value['Price']
 
+    # Left join category details from assets
+    assets = db.fetch_assets(conn)
+    assets = pd.DataFrame(assets,columns=['ID','Asset','Name','Category','Currency'])
+    assets.drop(columns=['ID','Name','Currency'], inplace=True)
+    df_value = pd.merge(df_value, assets, on=['Asset'], how='left')
+
     return df_value
 
 
@@ -132,6 +138,9 @@ def get_todays_holdings_and_values(conn):
     ).reset_index()
 
     return df_today_summary
+
+
+
 
 
 
