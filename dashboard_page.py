@@ -103,7 +103,7 @@ def show_dashboard_page(conn):
         # Display the Matplotlib figure using st.pyplot()
         st.pyplot(fig)
 
-
+        ####################
         ## Show values and holdings table
         st.subheader('Holdings')
         df_holdings = calcs.get_todays_holdings_and_values(conn)

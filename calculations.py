@@ -1,7 +1,5 @@
-import streamlit as st
 import pandas as pd
 import db_helpers as db
-import matplotlib.pyplot as plt
 from datetime import date
 
 
@@ -120,25 +118,6 @@ def get_holdings_values(conn):
     return df_value
 
 
-# Get today's holdings and values only
-def get_todays_holdings_and_values(conn):
-    # Get today's date   
-    today = pd.Timestamp(date.today())
-
-    # df_value
-    df_value = get_holdings_values(conn)
-
-    # Filter the DataFrame for today's date
-    df_today = df_value[df_value['Date'] == today]
-
-    # Group by 'Asset' and summarize today's cumulative units and value
-    df_today_summary = df_today.groupby('Asset').agg(
-        Holdings=('Cumulative_Units', 'sum'),   # Sum of today's holdings for each asset
-        Value=('Value', 'sum')                  # Total value of today's holdings for each asset
-    ).reset_index()
-
-    return df_today_summary
-
 
 def get_comparator(comp,conn):
 
@@ -204,11 +183,35 @@ def get_comparator(comp,conn):
     df_comp.drop(columns=['Price', 'Units', 'Cumulative_Units', 'Asset'], inplace=True)
     df_comp.set_index('Date', inplace=True)
 
-
     return df_comp
 
 
 
+# Get today's holdings and values only
+def get_todays_holdings_and_values(conn):
+    # Get today's date   
+    today = pd.Timestamp(date.today())
+
+    # df_value
+    df_value = get_holdings_values(conn)
+
+    # Filter the DataFrame for today's date
+    df_today = df_value[df_value['Date'] == today]
+
+    # Group by 'Asset' and summarize today's cumulative units and value
+    df_today_summary = df_today.groupby('Asset').agg(
+        Holdings=('Cumulative_Units', 'sum'),   # Sum of today's holdings for each asset
+        Value=('Value', 'sum')                  # Total value of today's holdings for each asset
+    ).reset_index()
+
+    # Number formats
+    df_today_summary['Holdings'] = df_today_summary['Holdings'].map("{:,.2f}".format)
+    df_today_summary['Value'] = df_today_summary['Value'].map("£{:,.0f}".format)
+
+    return df_today_summary
+
+def get_returns_by_asset(conn):
+    
 
 
 
