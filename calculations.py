@@ -188,7 +188,7 @@ def get_comparator(comp,conn):
 
 
 # Get today's holdings and values only
-def get_todays_holdings_and_values(conn):
+def get_todays_holdings_values_and_returns(conn):
     # Get today's date   
     today = pd.Timestamp(date.today())
 
@@ -204,14 +204,43 @@ def get_todays_holdings_and_values(conn):
         Value=('Value', 'sum')                  # Total value of today's holdings for each asset
     ).reset_index()
 
+    ## Get returns
+    # Get transactions
+    transactions = db.fetch_transactions(conn)
+    df_transactions = pd.DataFrame(transactions, columns=['ID', 'Date', 'Asset', 'Name', 'Category', 'Currency', 'Units'])
+    df_transactions.drop(columns=['ID','Name','Category','Currency'], inplace=True)
+    df_transactions['Date'] = pd.to_datetime(df_transactions['Date'])
+
+    # Get prices
+    prices = db.fetch_prices(conn)
+    df_prices = pd.DataFrame(prices, columns=['ID', 'Asset', 'Name', 'Currency', 'Date', 'Price'])
+    df_prices.drop(columns=['ID','Name','Currency'], inplace=True)
+    df_prices['Date'] = pd.to_datetime(df_prices['Date'])
+
+    # Merge transactions and prices to find amounts invested, then group by Asset to get total invested by Asset
+    df_invested = pd.merge(df_transactions, df_prices, how='left', on=['Asset','Date'])
+    df_invested['Invested'] = df_invested['Units'] * df_invested['Price']
+    #df_invested.drop(columns=[''])
+    df_invested = df_invested.groupby('Asset')[['Invested']].sum()
+
+    # Merge onto today summary 
+    df_today_summary = pd.merge(df_today_summary,df_invested, on='Asset', how='left')
+    df_today_summary['Return'] = df_today_summary['Value'] / df_today_summary['Invested']
+
+    
+
+
+
+
     # Number formats
     df_today_summary['Holdings'] = df_today_summary['Holdings'].map("{:,.2f}".format)
     df_today_summary['Value'] = df_today_summary['Value'].map("£{:,.0f}".format)
+    df_today_summary['Return'] = df_today_summary['Return'].map("{:,.0%}".format)
 
     return df_today_summary
 
-def get_returns_by_asset(conn):
-    
+
+
 
 
 

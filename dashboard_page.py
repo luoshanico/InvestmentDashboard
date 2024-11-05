@@ -106,7 +106,7 @@ def show_dashboard_page(conn):
         ####################
         ## Show values and holdings table
         st.subheader('Holdings')
-        df_holdings = calcs.get_todays_holdings_and_values(conn)
+        df_holdings = calcs.get_todays_holdings_values_and_returns(conn)
         st.dataframe(df_holdings, hide_index=True)
     
     else:
