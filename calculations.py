@@ -225,17 +225,19 @@ def get_todays_holdings_values_and_returns(conn):
 
     # Merge onto today summary 
     df_today_summary = pd.merge(df_today_summary,df_invested, on='Asset', how='left')
-    df_today_summary['Return'] = df_today_summary['Value'] / df_today_summary['Invested']
+    df_today_summary['Return'] = df_today_summary['Value'] / df_today_summary['Invested'] - 1
 
-    
-
-
-
+    # Calculate Profit
+    df_today_summary['Profit'] = df_today_summary['Value'] - df_today_summary['Invested']
+    df_today_summary = df_today_summary[['Asset','Holdings','Value','Invested','Profit','Return']]
 
     # Number formats
-    df_today_summary['Holdings'] = df_today_summary['Holdings'].map("{:,.2f}".format)
-    df_today_summary['Value'] = df_today_summary['Value'].map("£{:,.0f}".format)
-    df_today_summary['Return'] = df_today_summary['Return'].map("{:,.0%}".format)
+    # df_today_summary['Holdings'] = df_today_summary['Holdings'].map("{:,.2f}".format)
+    # df_today_summary['Value'] = df_today_summary['Value'].map("£{:,.0f}".format)
+    # df_today_summary['Invested'] = df_today_summary['Invested'].map("£{:,.0f}".format)
+    # df_today_summary['Profit'] = df_today_summary['Profit'].map("£{:,.0f}".format)
+    # df_today_summary['Return'] = df_today_summary['Return'].map("{:,.0%}".format)
+
 
     return df_today_summary
 

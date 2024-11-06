@@ -1,5 +1,6 @@
 import streamlit as st
 import pandas as pd
+import numpy as np
 import matplotlib.pyplot as plt
 import db_helpers as db
 import calculations as calcs
@@ -103,12 +104,80 @@ def show_dashboard_page(conn):
         # Display the Matplotlib figure using st.pyplot()
         st.pyplot(fig)
 
+       
+       
+       
+       
+       
+       
+       
+       
+       
         ####################
-        ## Show values and holdings table
-        st.subheader('Holdings')
+        ## Show values and holdings chart
         df_holdings = calcs.get_todays_holdings_values_and_returns(conn)
+        st.subheader('Holdings')
         st.dataframe(df_holdings, hide_index=True)
-    
+
+        # Set up the figure and bar height
+        fig, ax1 = plt.subplots(figsize=(10, 6))
+        bar_height = 0.2  # Height of each bar
+        y = np.arange(len(df_holdings))  # Position of clusters on the y-axis
+
+        # Calculate maximum width for each metric to extend x-axis limits
+        value_max = df_holdings['Value'].max()
+        profit_max = df_holdings['Profit'].max()
+        return_max = df_holdings['Return'].max()
+
+        # Set an offset for labels to ensure labels fit within the frame
+        label_offset = 0.005  # Distance for labels
+        extra_space = 1.2  # Extend axis limits by 20% for visibility
+
+        # Plot each metric on a different x-axis (horizontal bar chart)
+        # Plot Value on ax1
+        bars1 = ax1.barh(y - bar_height, df_holdings['Value'], height=bar_height, label='Value', color='b')
+        ax1.set_xlim(0, value_max * extra_space)  # Extend the x-axis limit for Value
+        ax1.get_xaxis().set_visible(False)  # Hide x-axis labels for ax1
+
+        # Plot Profit on ax2 (secondary x-axis)
+        ax2 = ax1.twiny()
+        bars2 = ax2.barh(y, df_holdings['Profit'], height=bar_height, label='Profit', color='g')
+        ax2.set_xlim(0, profit_max * extra_space)  # Extend the x-axis limit for Profit
+        ax2.get_xaxis().set_visible(False)  # Hide x-axis labels for ax2
+
+        # Plot Return on ax3 (third x-axis) with a secondary y-axis
+        ax3 = ax1.twiny()
+        ax3.spines['top'].set_position(('outward', 60))  # Offset the third axis
+        bars3 = ax3.barh(y + bar_height, df_holdings['Return'], height=bar_height, label='Return', color='r')
+        ax3.set_xlim(0, return_max * extra_space)  # Extend the x-axis limit for Return
+        ax3.get_xaxis().set_visible(False)  # Hide x-axis labels for ax3
+
+        # Customize y-axis with asset labels
+        ax1.set_yticks(y)
+        ax1.set_yticklabels(df_holdings['Asset'])
+        ax1.set_ylabel('Asset')
+        ax1.set_title('Holdings')
+
+        # Add data labels for each bar
+        for bar in bars1:
+            ax1.text(bar.get_width() + value_max*label_offset, bar.get_y() + bar.get_height() / 2, f'£{bar.get_width():.0f}', 
+                    va='center', ha='left')
+
+        for bar in bars2:
+            ax2.text(bar.get_width() + profit_max*label_offset, bar.get_y() + bar.get_height() / 2, f'£{bar.get_width():.0f}', 
+                    va='center', ha='left')
+
+        for bar in bars3:
+            ax3.text(bar.get_width() + return_max*label_offset, bar.get_y() + bar.get_height() / 2, f'{bar.get_width():.0%}', 
+                    va='center', ha='left')
+
+        # Add a legend
+        fig.legend(['Value', 'Profit', 'Return'], loc='upper right', bbox_to_anchor=(1.15, 1))
+
+        # Show plot
+        fig.tight_layout()
+        st.pyplot(fig)
+            
     else:
         st.subheader('Enter assets and transactions to view dashboard')
 
