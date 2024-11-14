@@ -6,12 +6,6 @@ import db_helpers as db
 import calculations as calcs
 from colour_palette import palette
 
-st.set_page_config(
-    page_title = 'Investments',
-    page_icon="💰",
-    layout="centered"
-        )
-
 
 font_title = {
         'color':  'black',

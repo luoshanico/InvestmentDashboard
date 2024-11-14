@@ -12,6 +12,13 @@ db.create_assets_table(conn)
 db.create_transactions_table(conn)
 db.create_prices_table(conn)
 
+# Page config
+st.set_page_config(
+    page_title = 'Investments',
+    page_icon="💰",
+    layout="centered"
+        )
+
 # Sidebar navigation
 st.sidebar.title("Navigation")
 page = st.sidebar.radio("Go to", ["Dashboard", "Transactions", "Assets", "Reset"])
