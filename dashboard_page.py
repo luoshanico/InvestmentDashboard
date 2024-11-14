@@ -13,7 +13,7 @@ st.set_page_config(
         )
 
 
-font_title = {'family': 'times',
+font_title = {
         'color':  'black',
         'weight': 'regular',
         'size': 14,
