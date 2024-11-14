@@ -4,7 +4,7 @@ from transactions_page import show_transactions_page
 from dashboard_page import show_dashboard_page
 from assets_page import show_assets_page
 from reset_page import show_reset_page
-
+from colour_palette import palette
 
 # Create connection to database
 conn = db.create_connection()

@@ -110,7 +110,7 @@ def show_assets_page(conn):
     # Graph for asset prices
     # Drop down to select asset to display in pricing chart
     options = df_assets['Asset']
-    selected_asset = st.selectbox("Choose an asset:", options)
+    selected_asset = st.selectbox("Choose an asset to see price chart:", options)
     
     # Fetch and plot prices for selected asset
     if not type(selected_asset) == None:
