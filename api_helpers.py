@@ -34,18 +34,18 @@ def get_fx_data(ticker, currency):
 
     
 
-def convert_prices_to_gbp(prices, fx_rates):
+def convert_prices_to_usd(prices, fx_rates):
      # Join dataframes on date
-    prices_gbp = pd.merge(prices, fx_rates, on='Date', how='left')
+    prices_usd = pd.merge(prices, fx_rates, on='Date', how='left')
     
-    # Calculate GBP price
-    prices_gbp['Price (GBP)'] = prices_gbp['Price'] / prices_gbp['Rate']
+    # Calculate USD price
+    prices_usd['Price (USD)'] = prices_usd['Price'] / prices_usd['Rate']
     
     # Drop columns and rename
-    prices_gbp = prices_gbp[['Asset_ID','Date','Price (GBP)']]
-    prices_gbp = prices_gbp.rename(columns={'Price (GBP)': 'Price'})
+    prices_usd = prices_usd[['Asset_ID','Date','Price (USD)']]
+    prices_usd = prices_usd.rename(columns={'Price (USD)': 'Price'})
     
-    return prices_gbp
+    return prices_usd
 
 
 def get_stock_info(ticker):

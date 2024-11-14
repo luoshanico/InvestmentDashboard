@@ -30,9 +30,18 @@ def show_assets_page(conn):
                 if df_assets[df_assets['Asset'] == ticker]['Asset'].count() == 0: 
                     # Call API to get ticker info
                     stock_info_dict = api.get_stock_info(ticker)
+
+                    # Check if ticker download from YF api was successful
+                    if not stock_info_dict == None:
+                        if not stock_info_dict['stock_name'] == '':
+                            tickerSuccess = True
+                        else:
+                            tickerSuccess = False
+                    else:
+                        tickerSuccess = False
                 
-                    # If ticker exists, insert ticker info into database
-                    if not stock_info_dict['stock_name'] == '':
+                    # If ticker downloaded successfully, insert ticker info into database
+                    if tickerSuccess == True:
                         db.insert_asset(
                             conn, 
                             asset = ticker,
@@ -44,8 +53,8 @@ def show_assets_page(conn):
                         st.warning("Ticker not found in Yahoo Finance")
 
                     
-                    # If ticker exists, call API to get pricing data and save to database
-                    if not stock_info_dict['stock_name'] == '':
+                    # If ticker downloaded successfully, call again API to get pricing data and save to database
+                    if tickerSuccess == True:
 
                         # local variable abort_upload will instruct when not to upload
                         abort_upload = False
@@ -60,17 +69,17 @@ def show_assets_page(conn):
                             abort_upload = True
                         else:
 
-                            # If not GBP pricing then download rate and convert to GBP
+                            # If not USD pricing then download rate and convert to USD
                             currency = stock_info_dict['stock_currency']
-                            if not (currency == 'GBP') or (currency == 'GBp'):
+                            if not (currency == 'USD'):
 
                                 # Get fx rates
-                                fx_ticker = 'GBP' + currency + '=X' # get ticker symbol for rate
+                                fx_ticker = 'USD' + currency + '=X' # get ticker symbol for rate
                                 fx_rates = api.get_fx_data(fx_ticker, currency)
                                 
                                 # if fx rates download succesfully then proceeds with conversion
                                 if not fx_rates.size == 0:
-                                    pricing_data = api.convert_prices_to_gbp(pricing_data, fx_rates)
+                                    pricing_data = api.convert_prices_to_usd(pricing_data, fx_rates)
 
                                 else: # if rates not downloaded then error message
                                     st.error('Could not find fx rates for {}.'.format(fx_ticker))
@@ -86,7 +95,7 @@ def show_assets_page(conn):
                                 db.insert_pricing_data(conn, data=pricing_data)
                                 st.rerun()
                                 st.success('Asset added successfully!')
-                
+                    
                 else:
                     st.warning("Asset already in system")
 
@@ -147,128 +156,3 @@ def show_assets_page(conn):
 
 
 
-# # Function to fetch and initialize the assets table from the database
-# def fetch_and_initialize_assets(conn):
-#     # Fetch assets data from database
-#     assets = db.fetch_assets(conn)
-#     # Create a DataFrame and initialize empty columns for Name, Category, and Currency
-#     df_assets = pd.DataFrame(assets, columns=['Asset'])
-#     df_assets['Name'] = ''
-#     df_assets['Category'] = ''
-#     df_assets['Currency'] = ''
-#     return df_assets
-
-# # Cache the API calls to minimize external requests
-# # @st.cache_data
-# def fetch_stock_info(asset):
-#     return api.get_stock_info(asset)
-
-# # Function to initialize the app state
-# def initialize_state(conn):
-#     if 'df_assets' not in st.session_state:
-#         st.session_state.df_assets = fetch_and_initialize_assets(conn)
-
-# # Main function to show the prices page
-# def show_assets_page(conn):
-#     # Initialize the state with assets data
-#     initialize_state(conn)
-
-#     st.title('Asset Data')
-
-#     # Display the assets table in Streamlit
-#     st.write('Prices downloaded:')
-#     st.dataframe(st.session_state.df_assets)
-
-#     # Button to fetch asset info from the API
-#     get_asset_info_button = st.button('Get asset info')
-
-#     if get_asset_info_button:
-#         for asset in st.session_state.df_assets['Asset']:
-#             # Fetch asset data from the API (cached to minimize calls)
-#             stock_info_dict = fetch_stock_info(asset)
-
-#             # Find asset row index and update DataFrame
-#             asset_row_index = st.session_state.df_assets.index[st.session_state.df_assets['Asset'] == asset]
-#             st.session_state.df_assets.loc[asset_row_index, 'Name'] = stock_info_dict['stock_name']
-#             st.session_state.df_assets.loc[asset_row_index, 'Category'] = stock_info_dict['stock_cat']
-#             st.session_state.df_assets.loc[asset_row_index, 'Currency'] = stock_info_dict['stock_currency']
-
-#         # Rerun to refresh the UI with the updated data
-#         st.rerun()
-
-
-
-# def show_prices_page(conn):
-
-#     ## Streamlit interface
-#     st.title('Asset Data')
-
-#     ## Assets table
-#     # Fetch and display the assets table
-#     assets = db.fetch_assets(conn)
-
-#     # Convert fetched data into a pandas DataFrame for display
-#     df_assets = pd.DataFrame(assets, columns=['Asset'])
-#     df_assets['Name'] = ''
-#     df_assets['Category'] = ''
-#     df_assets['Currency'] = ''
-
-#     # Display the assets table in Streamlit
-#     st.write('Prices downloaded:')
-#     st.dataframe(df_assets)
-
-#     # Fetch asset info from Yahoo finance
-#     # Buttons for get asset info
-#     get_asset_info_button = st.button('Get asset info')
-    
-#     if get_asset_info_button:
-#         for asset in df_assets['Asset']:
-#             # Get stock data
-#             stock_info_dict = api.get_stock_info(asset)
-
-#             # Find asset row index
-#             asset_row_index = df_assets.index[df_assets['Asset'] == asset]
-
-#             # Update dataframe for asset
-#             df_assets.loc[asset_row_index, 'Name'] = stock_info_dict['stock_name']
-#             df_assets.loc[asset_row_index, 'Category'] = stock_info_dict['stock_cat']
-#             df_assets.loc[asset_row_index, 'Currency'] = stock_info_dict['stock_currency']
-
-#         st.rerun()
-    
-    
-    
-#     # Select box for asset
-#     options = df_assets['Asset']
-#     selected_asset = st.selectbox("Choose an asset:", options)
-
-    # # Download pricing data for selected asset
-    # # Buttons for delete or cancel
-    # get_prices_button = st.button('Get prices')
-
-    # if get_prices_button:
-    #     pricing_data = api.get_pricing_data(selected_asset)
-    #     if pricing_data == 0:
-    #         st.error('Could not find prices for {}.'.format(selected_asset))
-    #         #st.rerun()
-    #     else:
-    #         db.insert_pricing_data(conn, data=pricing_data)
-    #         st.success('Prices downloaded successfully!')
-    #         st.rerun()
-            
-
-    # # Graph for asset prices
-    # filtered_df_assets = df_assets[df_assets['Asset']==selected_asset]
-    # download_status = filtered_df_assets['Download Status'].values[0]
-
-    # if download_status == 'Downloaded':
-    #     prices = db.fetch_prices(conn)
-    #     df_price_graph = pd.DataFrame(prices, columns=['ID','Asset','Date','Price'])
-    #     df_price_graph = df_price_graph[df_price_graph['Asset']==selected_asset]
-    #     df_price_graph = df_price_graph[['Date','Price']]
-    #     df_price_graph = df_price_graph.set_index('Date')
-    #     st.line_chart(df_price_graph['Price'])
-
-
-
-   
