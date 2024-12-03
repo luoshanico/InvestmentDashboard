@@ -115,6 +115,8 @@ Lesson learned on relying too heavily on ChatGPT. Googling still has an edge in 
 
 #### **3. Unit testing**
 
+I used Unittest MagicMock and patch to unit test the transactions page. I had difficulties getting the unit tests to run correctly. In particular, there was an issue where MagicMock was returning mocked objects rather than the specified return value of the mocked object. This caused my tested functions to fail. I finally resolved this by updating the app code so that the transactions page function took optional parameters which I could then pass directly into the function when testing, instead of using mocked objects. I do not think this would be a good solution for a more complicated app and would be interested to understand a better solution. 
+
 
 ## Future enhancements
 
