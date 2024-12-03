@@ -1,9 +1,9 @@
 import streamlit as st
 import pandas as pd
-import db_helpers as db
+import project.db_helpers as db
 
 
-def show_transactions_page(conn):
+def show_transactions_page(conn, tx_date=None, asset_id=None, num_units=None):
 
     ## Streamlit interface
     st.title('Investment Transactions')
@@ -29,22 +29,28 @@ def show_transactions_page(conn):
     ## Add transactions
     with st.expander("Add Transaction"):
         with st.form(key="add_form"):
-            date = st.date_input('Transaction Date')
             
-            # Fetch assets to create a drop down list in transactions form
-            assets = db.fetch_assets(conn)
-            df_assets = pd.DataFrame(assets, columns=['ID', 'Asset', 'Name', 'Category', 'Currency'])
-            options = df_assets['Asset']
-            asset = st.selectbox("Choose an asset:", options)
-            asset_id = db.fetch_asset_id(conn, asset)
+            # date input
+            if tx_date == None:
+                tx_date = str(st.date_input('Transaction Date'))
             
-            num_units = st.number_input('Units', min_value=0.0, step=0.1)
+            # Asset input
+            if asset_id == None:
+                assets = db.fetch_assets(conn)
+                df_assets = pd.DataFrame(assets, columns=['ID', 'Asset', 'Name', 'Category', 'Currency'])
+                options = df_assets['Asset']
+                asset = st.selectbox("Choose an asset:", options)
+                asset_id = db.fetch_asset_id(conn, asset)
+            
+            # number of units of asset to input
+            if num_units == None: 
+                num_units = st.number_input('Units', min_value=0.0, step=0.1)
             
             # Buttons for delete or cancel
             add_confirm = st.form_submit_button('Add')
 
             if add_confirm:
-                db.insert_transaction(conn, str(date), asset_id, num_units)
+                db.insert_transaction(conn, tx_date, asset_id, num_units)
                 st.success('Transaction added successfully!')
                 st.rerun()
 

@@ -1,10 +1,13 @@
 import streamlit as st
-import db_helpers as db
-from transactions_page import show_transactions_page
-from dashboard_page import show_dashboard_page
-from assets_page import show_assets_page
-from reset_page import show_reset_page
-from colour_palette import palette
+import project.db_helpers as db
+from project.transactions_page import show_transactions_page
+from project.dashboard_page import show_dashboard_page
+from project.assets_page import show_assets_page
+from project.reset_page import show_reset_page
+from project.colour_palette import palette
+import warnings
+
+warnings.filterwarnings("ignore", category=RuntimeWarning, module="streamlit")
 
 # Create connection to database
 conn = db.create_connection()
@@ -34,4 +37,4 @@ elif page == "Reset":
     show_reset_page(conn)
 
 
-# streamlit run C:\Users\nicow\OneDrive\Documents\Python\InvestmentDashboard\app.py
+# streamlit run C:\Users\nicow\OneDrive\Documents\Python\InvestmentDashboard\bin\InvestmentDashboard.py

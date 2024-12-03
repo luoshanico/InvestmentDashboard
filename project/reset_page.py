@@ -1,5 +1,5 @@
 import streamlit as st
-import db_helpers as db
+import project.db_helpers as db
 
 def show_reset_page(conn):
     reset_button = st.button("Reset database")
