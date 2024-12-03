@@ -1,0 +1,13 @@
+Metadata-Version: 2.1
+Name: Investment-Dashboard
+Version: 1.0
+Summary: An investment dashboard. Track total value over time
+Home-page: http://www.google.com/
+Author: Nico Worrall
+Author-email: foomail@foo.example
+License: No licensing
+Requires-Dist: streamlit
+Requires-Dist: numpy
+Requires-Dist: pandas
+Requires-Dist: yfinance
+Requires-Dist: datetime

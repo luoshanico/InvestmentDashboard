@@ -2,9 +2,9 @@ import streamlit as st
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
-import db_helpers as db
-import calculations as calcs
-from colour_palette import palette
+import project.db_helpers as db
+import project.calculations as calcs
+from project.colour_palette import palette
 
 
 font_title = {
@@ -119,6 +119,7 @@ def show_dashboard_page(conn):
        
         ####################
         ## Show values and holdings chart
+        st.write("#")
         df_holdings = calcs.get_todays_holdings_values_and_returns(conn)
         st.subheader('Holdings Breakdown')
 

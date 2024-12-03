@@ -1,7 +1,7 @@
 import streamlit as st
 import pandas as pd
-import db_helpers as db
-import api_helpers as api
+import project.db_helpers as db
+import project.api_helpers as api
 
 # Show assets page
 def show_assets_page(conn):
