@@ -55,7 +55,7 @@ def show_transactions_page(conn, tx_date=None, asset_id=None, num_units=None):
                 st.rerun()
 
 
-    # Add "Delete Transaction" form
+    # Delete Transaction
     with st.expander("Delete Transaction"):
         with st.form(key="delete_form"):
             transaction_id = st.number_input('Enter Transaction ID to Delete', min_value=1, step=1, format='%d')
