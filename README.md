@@ -10,7 +10,7 @@ The Hargreaves Lansdown investment dashboard has three main limitations:
 2. The user is unable to bring other assets (e.g. crypto or cash) into the same view.
 3. The user is limited to showing actual transactions, and cannot input hypothetical transactions for "what-if?" analysis.
 
-This project was designed to overcome these limitations.
+I wanted to build a simple dashboard with these three features. 
 
 ### Learning objectives
 
@@ -50,7 +50,7 @@ Clearly, the other major motivation for creating this tool was my personal learn
 ### Installation
 1. Clone the repository:
     ```bash
-    git clone https://github.com/yourusername/investment-dashboard.git
+    git clone https://github.com/luoshanico/investment-dashboard.git
 2. Navigate to the project directory
     ```bash
     cd investment-dashboard
@@ -63,29 +63,43 @@ Clearly, the other major motivation for creating this tool was my personal learn
 ## Usage
 
 #### **Step 1: Add assets**
-- You need to add assets before you can add transactions.
+You need to add assets before you can add transactions. Adding an asset simply downloads and stores the five year daily price history from Yahoo Finance.
 - Navigate to "Assets" page
-- The app will download the five year daily price history from Yahoo Finance when you add an asset
-- You may need to look on Yahoo Finance to find the right ticker symbol.
-- When the asset has downloaded successfully along with prices, you should be able to view the price history in the chart on the assets page
+- Expand "Add asset"
+- Type in the ticker code (If you don't know the relevant ticker symbol, then look on the Yahoo Finance website.)
+- Press "Add" 
+
+When the asset has downloaded successfully along with prices, you should be able to view the price history in the chart on the assets page
+
+Note the prices are always converted into USD by default on download.
+
+_In the screenshot below, the user has already added Nvidia, Microsoft, Bitcoin and the S&P500 Index assets. The user is in the process of adding Gamestop. The graph gives user comfort that prices have downloaded successfully and accurately._
+
+![Assets Page](assets/assets.png)
 
 #### **Step 2: Add transactions**
 - Navigate to transactions page. 
 - Choose asset for which you want to add transaction from the dropdown. All assets you have added to the app will appear here. 
 - Select date and units to add the transaction. 
 
+_In the screenshot below we are about to add a purchase of 0.05 Bitcoin in Dec'22. The summary table shows we already have three transactions saved._
+
+![Transactions Page](assets/transactions.png)
+
 #### **Step 3: View Dashboard**
 - Navigate to dashboard page.
 - Dashboard should have updated to show various visuals/metrics of your portfolio.
+
+_Screenshots below show two of the charts on the dashboard. In the first chart, the user has chosen to compare their portfolio transactions with equivalent transactions in the S&P500 index. In this case, the user has outperformed the S&P500._
+
+![Dashboard1 Page](assets/dashboard_1.png)
+![Dashboard2 Page](assets/dashboard_2.png)
 
 #### **Deleting data**
 - You can delete individual transactions via the transactions page
 - You can delete assets (and all related transactions) via the assets page
 - You can reset the entire database (deletes all assets and transactions) from the Reset page
 - You can not edit transactions, they must be deleted and re-added. 
-
-## Screenshots
-
 
 
 ## Testing
@@ -123,13 +137,12 @@ I used Unittest MagicMock and patch to unit test the transactions page. I had di
 - Add OAuth for user authentication and secure data storage.
 - Enable export of reports to CSV/Excel.
 - Enable import of transactions/asset data via CSV/Excel
-- Additional analytics:
-    - inflation adjusted returns
-    - forecasting
+- Additional dashboard visuals
 - Additional complexities of real world investing:
     - Transaction fees / management fees
     - Dividends
     - Stock splits / stock buy backs
+    - Inflation adjusted returns
 - Deploy the app to the cloud (e.g., Streamlit Community Cloud, AWS, Heroku).
 
 
