@@ -46,7 +46,7 @@ def show_transactions_page(conn, tx_date=None, asset_id=None, num_units=None):
             if num_units == None: 
                 num_units = st.number_input('Units', min_value=0.0, step=0.1)
             
-            # Buttons for delete or cancel
+            # Buttons for submitting form to add transaction
             add_confirm = st.form_submit_button('Add')
 
             if add_confirm:
