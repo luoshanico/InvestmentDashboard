@@ -50,13 +50,13 @@ Clearly, the other major motivation for creating this tool was my personal learn
 ### Installation
 1. Clone the repository:
     ```bash
-    git clone https://github.com/luoshanico/investment-dashboard.git
+    git clone https://github.com/luoshanico/InvestmentDashboard.git
 2. Navigate to the project directory
     ```bash
-    cd investment-dashboard
+    cd InvestmentDashboard
 3. Install required dependencies:
     ```bash
-    pip install -r requirements.txt
+    pip install -r Investment_Dashboard.egg-info/requires.txt
 4. Run the app:
     ```bash
     streamlit run bin/InvestmentDashboard.py
