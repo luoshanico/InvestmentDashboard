@@ -93,7 +93,6 @@ _In the screenshot below we are about to add a purchase of 0.05 Bitcoin in Dec'2
 _Screenshots below show two of the charts on the dashboard. In the first chart, the user has chosen to compare their portfolio transactions with equivalent transactions in the S&P500 index. In this case, the user has outperformed the S&P500._
 
 ![Dashboard1 Page](assets/dashboard_1.png)
-![Dashboard2 Page](assets/dashboard_2.png)
 
 #### **Deleting data**
 - You can delete individual transactions via the transactions page
@@ -103,11 +102,16 @@ _Screenshots below show two of the charts on the dashboard. In the first chart, 
 
 
 ## Testing
-- How to run tests:
+I wanted to learn about unit testing and so I wrote tests for the transactions page. As an expansion, I would write tests for the other parts of the app. However, it felt like the learning exercise was done and I wanted to move on! 
 
-  ```bash
-  pytest tests/
-
+Here's how to run the tests. First see installation instructions above. 
+ 
+1. Navigate to project directory
+    ```bash
+    cd /path/to/your/project
+2. Run tests
+    ```bash
+    python -m unittest discover -s project/tests -p "test_*.py"
 ## Challenges faced
 
 #### **1. Data model choice**
