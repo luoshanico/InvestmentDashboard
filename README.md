@@ -21,7 +21,7 @@ Clearly, the other major motivation for creating this tool was my personal learn
 4. Git
 5. Unit testing
 6. Project folder structure
-7. Use of ChatGPT to efficiently write code
+7. Use of ChatGPT to efficiently write code 
 
 ## Features
 
